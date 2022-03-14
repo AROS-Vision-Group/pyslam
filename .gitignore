@@ -15,6 +15,12 @@ map.png
 .vscode 
 videos/webcam
 
+*.mp4
+*.mov
+*.avi
+*.pt
+*.pth
+
 kf_info.log 
 local_mapping.log 
 tum_association_matches.txt 
