@@ -93,8 +93,9 @@ def feature_manager_factory(num_features=kNumFeatureDefault,
                             num_levels = kNumLevelsDefault,                  # number of pyramid levels or octaves for detector and descriptor
                             scale_factor = kScaleFactorDefault,              # detection scale factor (if it can be set, otherwise it is automatically computed)
                             detector_type = FeatureDetectorTypes.FAST, 
-                            descriptor_type = FeatureDescriptorTypes.ORB):
-    return FeatureManager(num_features, num_levels, scale_factor, detector_type, descriptor_type)
+                            descriptor_type = FeatureDescriptorTypes.ORB,
+                            keypoint_classifier = None):
+    return FeatureManager(num_features, num_levels, scale_factor, detector_type, descriptor_type, keypoint_classifier)
 
 
 # Manager of both detector and descriptor 
@@ -104,10 +105,13 @@ class FeatureManager(object):
                        num_levels = kNumLevelsDefault,                         # number of pyramid levels or octaves for detector and descriptor
                        scale_factor = kScaleFactorDefault,                     # detection scale factor (if it can be set, otherwise it is automatically computed)
                        detector_type = FeatureDetectorTypes.FAST,  
-                       descriptor_type = FeatureDescriptorTypes.ORB):
+                       descriptor_type = FeatureDescriptorTypes.ORB,
+                       keypoint_classifier = None):
+        self.keypoint_classifier = keypoint_classifier
+
         self.detector_type = detector_type 
-        self._feature_detector   = None 
-                
+        self._feature_detector   = None
+
         self.descriptor_type = descriptor_type
         self._feature_descriptor = None 
                 
@@ -936,8 +940,8 @@ class FeatureManager(object):
             #
             #kps, des = self.block_adaptor.detectAndCompute(frame, mask)    
             #
-            kps = self.detect(frame, mask, filter=True)        # first, detect by using adaptor                           
-            kps, des = self.compute(frame, kps, filter=False)  # then, separately compute the descriptors   
+            kps = self.detect(frame, mask, filter=True)        # first, detect by using adaptor
+            kps, des = self.compute(frame, kps, filter=False)  # then, separately compute the descriptors
             filter = False  # disable keypoint filtering since we already applied it for detection            
         else:                         
             # standard detectAndCompute  
@@ -958,8 +962,12 @@ class FeatureManager(object):
                     print('descriptor: ', self.descriptor_type.name, ', #features: ', len(kps))   
         # filter keypoints   
         filter_name = 'NONE'
-        if filter:                                                                 
-            kps, des, filter_name  = self.filter_keypoints(self.keypoint_filter_type, frame, kps, des)                                                              
+        if self.keypoint_classifier is not None:
+            l = len(kps)
+            kps, des = self.keypoint_classifier.predict_and_filter(kps, des, frame)
+            print("Removed ", l - len(kps), "kps")
+        if filter:
+            kps, des, filter_name  = self.filter_keypoints(self.keypoint_filter_type, frame, kps, des)
         if self.detector_type == FeatureDetectorTypes.SIFT or \
            self.detector_type == FeatureDetectorTypes.ROOT_SIFT or \
            self.detector_type == FeatureDetectorTypes.CONTEXTDESC :

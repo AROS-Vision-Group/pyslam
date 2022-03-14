@@ -16,6 +16,7 @@
 * You should have received a copy of the GNU General Public License
 * along with PYSLAM. If not, see <http://www.gnu.org/licenses/>.
 """
+import sys
 
 import numpy as np
 import cv2
@@ -34,6 +35,7 @@ from dataset import dataset_factory
 #from mplot3d import Mplot3d
 #from mplot2d import Mplot2d
 from mplot_thread import Mplot2d, Mplot3d
+from snow_classification.utils.Classifier import DescriptorPredictor, PatchPredictor
 
 if platform.system()  == 'Linux':     
     from display2D import Display2D  #  !NOTE: pygame generate troubles under macOS!
@@ -76,7 +78,22 @@ if __name__ == "__main__":
     tracker_config = FeatureTrackerConfigs.TEST
     tracker_config['num_features'] = num_features
     tracker_config['tracker_type'] = tracker_type
-    
+
+    tracker_config['keypoint_classifier'] = None
+    if len(sys.argv) > 1:
+        import torch
+        if torch.cuda.is_available():
+            dev = "cuda:0"
+        else:
+            dev = "cpu"
+        print(f"Using device: {dev}")
+        device = torch.device(dev)
+
+        print(sys.argv[1])
+        if sys.argv[1] == "desc":
+            tracker_config['keypoint_classifier'] = DescriptorPredictor(dev, state_dict_path="snow_classification/DescriptorClassifier/Models/model_newdark.pt")
+        elif sys.argv[1] == "patch":
+            tracker_config['keypoint_classifier'] = PatchPredictor(dev, state_dict_path="snow_classification/PatchClassifier/dark_patch.pt")
     print('tracker_config: ',tracker_config)    
     feature_tracker = feature_tracker_factory(**tracker_config)
     

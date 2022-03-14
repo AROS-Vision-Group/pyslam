@@ -47,7 +47,8 @@ def feature_tracker_factory(num_features=kMinNumFeatureDefault,
                             detector_type = FeatureDetectorTypes.FAST, 
                             descriptor_type = FeatureDescriptorTypes.ORB, 
                             match_ratio_test = kRatioTest,
-                            tracker_type = FeatureTrackerTypes.LK):
+                            tracker_type = FeatureTrackerTypes.LK,
+                            keypoint_classifier = None):
     if tracker_type == FeatureTrackerTypes.LK:
         return LkFeatureTracker(num_features=num_features, 
                                 num_levels = num_levels, 
@@ -63,7 +64,8 @@ def feature_tracker_factory(num_features=kMinNumFeatureDefault,
                                         detector_type = detector_type, 
                                         descriptor_type = descriptor_type,
                                         match_ratio_test = match_ratio_test,    
-                                        tracker_type = tracker_type)
+                                        tracker_type = tracker_type,
+                                        keypoint_classifier = keypoint_classifier)
     return None 
 
 
@@ -186,7 +188,8 @@ class DescriptorFeatureTracker(FeatureTracker):
                        detector_type = FeatureDetectorTypes.FAST, 
                        descriptor_type = FeatureDescriptorTypes.ORB,
                        match_ratio_test = kRatioTest, 
-                       tracker_type = FeatureTrackerTypes.DES_FLANN):
+                       tracker_type = FeatureTrackerTypes.DES_FLANN,
+                       keypoint_classifier = None):
         super().__init__(num_features=num_features, 
                          num_levels=num_levels, 
                          scale_factor=scale_factor, 
@@ -198,7 +201,8 @@ class DescriptorFeatureTracker(FeatureTracker):
                                                        num_levels=num_levels, 
                                                        scale_factor=scale_factor, 
                                                        detector_type=detector_type, 
-                                                       descriptor_type=descriptor_type)                     
+                                                       descriptor_type=descriptor_type,
+                                                       keypoint_classifier = keypoint_classifier)
 
         if tracker_type == FeatureTrackerTypes.DES_FLANN:
             self.matching_algo = FeatureMatcherTypes.FLANN
