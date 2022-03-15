@@ -515,6 +515,7 @@ class Frame(FrameBase):
         
     # draw tracked features on the image
     def draw_all_feature_trails(self, img):
+        print("showing", len(self.kps), "kps")
         kps_idxs = range(len(self.kps))
         return self.draw_feature_trails(img, kps_idxs)   
 

@@ -17,12 +17,12 @@ class PatchPredictor(Classifier):
         self.batch_size = batch_size
         self.scales = scales
         if scales is None:
-            self.scales = [1, 0.75, 0.5]
+            self.scales = [1]
         self.patch_size = patch_size
         self.classifier = pclf(patch_size=patch_size)
         self.device = device
         if state_dict_path is not None:
-            self.classifier.load_state_dict(torch.load(state_dict_path))
+            self.classifier.load_state_dict(torch.load(state_dict_path, map_location=torch.device(device)))
         elif state_dict is not None:
             self.classifier.load_state_dict(state_dict)
         self.classifier.to(device)
@@ -75,7 +75,7 @@ class DescriptorPredictor(Classifier):
         self.batch_size = batch_size
         self.classifier = dclf(input_size=input_size)
         if state_dict_path is not None:
-            self.classifier.load_state_dict(torch.load(state_dict_path))
+            self.classifier.load_state_dict(torch.load(state_dict_path, map_location=torch.device(device)))
         elif state_dict is not None:
             self.classifier.load_state_dict(state_dict)
         self.orb = cv2.ORB_create(n_features)

@@ -16,12 +16,13 @@
 * You should have received a copy of the GNU General Public License
 * along with PYSLAM. If not, see <http://www.gnu.org/licenses/>.
 """
-
+import sys
 import numpy as np
 import cv2
 import math
 
 from config import Config
+from snow_classification.utils.Classifier import DescriptorPredictor, PatchPredictor
 
 from visual_odometry import VisualOdometry
 from camera  import PinholeCamera
@@ -44,7 +45,9 @@ from feature_tracker_configs import FeatureTrackerConfigs
 """
 use or not pangolin (if you want to use it then you need to install it by using the script install_thirdparty.sh)
 """
-kUsePangolin = False  
+
+
+kUsePangolin = False
 
 if kUsePangolin:
     from viewer3D import Viewer3D
@@ -66,14 +69,38 @@ if __name__ == "__main__":
                         config.DistCoef, config.cam_settings['Camera.fps'])
 
 
+
+
+
     num_features=2000  # how many features do you want to detect and track?
 
     # select your tracker configuration (see the file feature_tracker_configs.py) 
     # LK_SHI_TOMASI, LK_FAST
     # SHI_TOMASI_ORB, FAST_ORB, ORB, BRISK, AKAZE, FAST_FREAK, SIFT, ROOT_SIFT, SURF, SUPERPOINT, FAST_TFEAT
-    tracker_config = FeatureTrackerConfigs.LK_SHI_TOMASI
+    tracker_config = FeatureTrackerConfigs.SHI_TOMASI_ORB
     tracker_config['num_features'] = num_features
-    
+
+    tracker_config['keypoint_classifier'] = None
+    if len(sys.argv) > 1:
+        import torch
+
+        if torch.cuda.is_available():
+            dev = "cuda:0"
+        else:
+            dev = "cpu"
+        print(f"Using device: {dev}")
+        device = torch.device(dev)
+
+        print(sys.argv[1])
+        if sys.argv[1] == "desc":
+            tracker_config['keypoint_classifier'] = DescriptorPredictor(dev,
+                                                                        state_dict_path="snow_classification/DescriptorClassifier/Models/model_newdark.pt")
+        elif sys.argv[1] == "patch":
+            tracker_config['keypoint_classifier'] = PatchPredictor(dev,
+                                                                   state_dict_path="snow_classification/PatchClassifier/dark_patch.pt")
+    print('tracker_config: ', tracker_config)
+    feature_tracker = feature_tracker_factory(**tracker_config)
+
     feature_tracker = feature_tracker_factory(**tracker_config)
 
     # create visual odometry object 

@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
     # select your tracker configuration (see the file feature_tracker_configs.py) 
     # FeatureTrackerConfigs: SHI_TOMASI_ORB, FAST_ORB, ORB, ORB2, ORB2_FREAK, ORB2_BEBLID, BRISK, AKAZE, FAST_FREAK, SIFT, ROOT_SIFT, SURF, SUPERPOINT, FAST_TFEAT, CONTEXTDESC
-    tracker_config = FeatureTrackerConfigs.TEST
+    tracker_config = FeatureTrackerConfigs.SHI_TOMASI_ORB
     tracker_config['num_features'] = num_features
     tracker_config['tracker_type'] = tracker_type
 
@@ -92,6 +92,7 @@ if __name__ == "__main__":
         print(sys.argv[1])
         if sys.argv[1] == "desc":
             tracker_config['keypoint_classifier'] = DescriptorPredictor(dev, state_dict_path="snow_classification/DescriptorClassifier/Models/model_newdark.pt")
+
         elif sys.argv[1] == "patch":
             tracker_config['keypoint_classifier'] = PatchPredictor(dev, state_dict_path="snow_classification/PatchClassifier/dark_patch.pt")
     print('tracker_config: ',tracker_config)    

@@ -923,6 +923,7 @@ class FeatureManager(object):
     # detect keypoints and their descriptors
     # out: kps, des 
     def detectAndCompute(self, frame, mask=None, filter = True):
+        color_frame = cv2.cvtColor(frame,cv2.COLOR_RGB2BGR)
         if not self.need_color_image and frame.ndim>2:     # check if we have to convert to gray image 
             frame = cv2.cvtColor(frame,cv2.COLOR_RGB2GRAY)  
         if self.use_pyramid_adaptor:  
@@ -964,7 +965,7 @@ class FeatureManager(object):
         filter_name = 'NONE'
         if self.keypoint_classifier is not None:
             l = len(kps)
-            kps, des = self.keypoint_classifier.predict_and_filter(kps, des, frame)
+            kps, des = self.keypoint_classifier.predict_and_filter(kps, des, color_frame)
             print("Removed ", l - len(kps), "kps")
         if filter:
             kps, des, filter_name  = self.filter_keypoints(self.keypoint_filter_type, frame, kps, des)

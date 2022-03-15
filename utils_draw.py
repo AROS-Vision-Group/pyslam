@@ -26,7 +26,8 @@ import string
 
 
 # draw a list of points with different random colors on a input image 
-def draw_points(img, pts, radius=5): 
+def draw_points(img, pts, radius=5):
+    print("drawing", len(pts), "pts")
     if img.ndim < 3:
         img = cv2.cvtColor(img,cv2.COLOR_GRAY2BGR)
     for pt in pts:
