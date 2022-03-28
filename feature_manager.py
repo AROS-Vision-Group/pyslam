@@ -925,32 +925,9 @@ class FeatureManager(object):
     # detect keypoints and their descriptors
     # out: kps, des 
     def detectAndCompute(self, frame, mask=None, filter = True, do_recursive = True, color_frame = None):
-        if mask is not None:
-            print("-" * 60)
-            print("-" * 60)
-            print("-" * 60)
-            print("-" * 60)
-            print("-" * 60)
-            print("-" * 60)
-            print("-" * 60)
-            print("-" * 60)
-            print("-" * 60)
-            print("-" * 60)
-            print("-" * 60)
-            print("-" * 60)
-            print("-" * 60)
-            print("-" * 60)
-            print("-" * 60)
-            print("-" * 60)
-            print("-" * 60)
-            print("-" * 60)
-            print("-" * 60)
-            print("-" * 60)
-            print("-" * 60)
-            print("-" * 60)
         if color_frame is None:
             color_frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-        if not self.need_color_image and frame.ndim>2 and not do_recursive:     # check if we have to convert to gray image
+        if not self.need_color_image and frame.ndim>2 and do_recursive:     # check if we have to convert to gray image
             frame = cv2.cvtColor(frame,cv2.COLOR_RGB2GRAY)  
         if self.use_pyramid_adaptor:  
             # detectAndCompute with pyramid adaptor (it can optionally include a block adaptor per level)
@@ -959,7 +936,6 @@ class FeatureManager(object):
                 kps, des = self.pyramid_adaptor.detectAndCompute(frame, mask)  
             #
             else:
-                print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
                 kps = self.detect(frame, mask, filter=True)        # first, detect by using adaptor on the different pyramid levels
                 kps, des = self.compute(frame, kps, filter=False)  # then, separately compute the descriptors on detected keypoints (one time)
                 filter = False # disable keypoint filtering since we already applied it for detection 
@@ -975,7 +951,7 @@ class FeatureManager(object):
             # standard detectAndCompute  
             if self.is_detector_equal_to_descriptor:                     
                 # detector = descriptor => call them together with detectAndCompute() method    
-                kps, des = self._feature_detector.detectAndCompute(frame, mask)   
+                kps, des = self._feature_detector.detectAndCompute(frame, mask)
                 if kVerbose:
                     print('detector:', self.detector_type.name,', #features:',len(kps))           
                     print('descriptor:', self.descriptor_type.name,', #features:',len(kps))                      

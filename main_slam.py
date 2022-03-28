@@ -68,14 +68,14 @@ if __name__ == "__main__":
                         config.cam_settings['Camera.cx'], config.cam_settings['Camera.cy'],
                         config.DistCoef, config.cam_settings['Camera.fps'])
     
-    num_features=4000
+    num_features=2000
 
     tracker_type = FeatureTrackerTypes.DES_BF      # descriptor-based, brute force matching with knn 
     #tracker_type = FeatureTrackerTypes.DES_FLANN  # descriptor-based, FLANN-based matching 
 
     # select your tracker configuration (see the file feature_tracker_configs.py) 
     # FeatureTrackerConfigs: SHI_TOMASI_ORB, FAST_ORB, ORB, ORB2, ORB2_FREAK, ORB2_BEBLID, BRISK, AKAZE, FAST_FREAK, SIFT, ROOT_SIFT, SURF, SUPERPOINT, FAST_TFEAT, CONTEXTDESC
-    tracker_config = FeatureTrackerConfigs.ORB
+    tracker_config = FeatureTrackerConfigs.D2
     tracker_config['num_features'] = num_features
     tracker_config['tracker_type'] = tracker_type
     #tracker_config['num_levels'] = 5

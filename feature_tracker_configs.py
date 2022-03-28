@@ -186,6 +186,24 @@ class FeatureTrackerConfigs(object):
                       match_ratio_test = kRatioTest,                               
                       tracker_type = kTrackerType)
 
+    R2D2 = dict(num_features=kNumFeatures,
+                      # N.B.: here, keypoints are not oriented! (i.e. keypoint.angle=0 always)
+                      num_levels=8,
+                      scale_factor=1.2,
+                      detector_type=FeatureDetectorTypes.R2D2,
+                      descriptor_type=FeatureDescriptorTypes.R2D2,
+                      match_ratio_test=kRatioTest,
+                      tracker_type=kTrackerType)
+
+    D2 = dict(num_features=kNumFeatures,
+                # N.B.: here, keypoints are not oriented! (i.e. keypoint.angle=0 always)
+                num_levels=8,
+                scale_factor=1.2,
+                detector_type=FeatureDetectorTypes.D2NET,
+                descriptor_type=FeatureDescriptorTypes.D2NET,
+                match_ratio_test=kRatioTest,
+                tracker_type=kTrackerType)
+
     CONTEXTDESC = dict(num_features=kNumFeatures,                   
                        num_levels = 1,                                  
                        scale_factor = 1.2,                              

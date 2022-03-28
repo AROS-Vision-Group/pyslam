@@ -29,6 +29,8 @@ import argparse
 import cv2 
 import numpy as np
 
+from PIL import Image
+
 import imageio
 
 from threading import RLock
@@ -123,15 +125,11 @@ class D2NetFeature2D:
             # TODO: switch to PIL.Image due to deprecation of scipy.misc.imresize.
             resized_image = image
             if max(resized_image.shape) > self.max_edge:
-                resized_image = scipy.misc.imresize(
-                    resized_image,
-                    self.max_edge / max(resized_image.shape)
-                ).astype('float')
+                resized_image = np.array(Image.fromarray(image).resize((self.max_edge / max(resized_image.shape)*image.shape))).astype('float')
             if sum(resized_image.shape[: 2]) > self.max_sum_edges:
-                resized_image = scipy.misc.imresize(
-                    resized_image,
-                    self.max_sum_edges / sum(resized_image.shape[: 2])
-                ).astype('float')
+                resized_image = np.array(
+                    Image.fromarray(image).resize((self.max_sum_edges / sum(resized_image.shape[: 2])*image.shape[:2]))).astype(
+                    'float')
 
             fact_i = image.shape[0] / resized_image.shape[0]
             fact_j = image.shape[1] / resized_image.shape[1]
