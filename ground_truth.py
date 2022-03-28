@@ -112,6 +112,7 @@ class SimpleGroundTruth(GroundTruth):
         y = self.scale*float(ss[1])
         z = self.scale*float(ss[2])
         abs_scale = np.sqrt((x - x_prev)*(x - x_prev) + (y - y_prev)*(y - y_prev) + (z - z_prev)*(z - z_prev))
+        print("-"*15, abs_scale)
         return x,y,z,abs_scale 
 
 

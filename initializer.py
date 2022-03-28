@@ -84,7 +84,11 @@ class Initializer(object):
     # N.B.5: the OpenCV findEssentialMat function uses the five-point algorithm solver by D. Nister => hence it should work well in the degenerate planar cases
     def estimatePose(self, kpn_ref, kpn_cur):	     
         # here, the essential matrix algorithm uses the five-point algorithm solver by D. Nister (see the notes and paper above )     
-        E, self.mask_match = cv2.findEssentialMat(kpn_cur, kpn_ref, focal=1, pp=(0., 0.), method=cv2.RANSAC, prob=kRansacProb, threshold=kRansacThresholdNormalized)                         
+        E, self.mask_match = cv2.findEssentialMat(kpn_cur, kpn_ref, focal=1, pp=(0., 0.), method=cv2.RANSAC, prob=kRansacProb, threshold=kRansacThresholdNormalized)
+        print("estimatePose() ----------")
+        print(E)
+        print(kpn_ref)
+        print(kpn_cur)
         _, R, t, mask = cv2.recoverPose(E, kpn_cur, kpn_ref, focal=1, pp=(0., 0.))                                                     
         return poseRt(R,t.T)  # Trc  homogeneous transformation matrix with respect to 'ref' frame,  pr_= Trc * pc_        
 

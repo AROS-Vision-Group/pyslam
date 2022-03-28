@@ -8,7 +8,7 @@ class PatchClassifier(nn.Module):
         self.flatten = nn.Flatten()
 
         self.conv1 = nn.Sequential(
-            nn.Conv2d(in_channels=3, out_channels=32, kernel_size=(3, 3), bias=False, padding="same"),
+            nn.Conv2d(in_channels=9, out_channels=32, kernel_size=(3, 3), bias=False, padding="same"),
             nn.ReLU(),
             nn.BatchNorm2d(num_features=32),
             nn.MaxPool2d(kernel_size=2),

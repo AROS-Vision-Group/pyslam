@@ -28,6 +28,8 @@ from parameters import Parameters
 
 from feature_types import FeatureDetectorTypes, FeatureDescriptorTypes, FeatureInfo
 
+from snow_classification.utils.detector_mask import get_mask
+
 from utils_sys import Printer, import_from
 from utils_features import unpackSiftOctaveKps, UnpackOctaveMethod, sat_num_features, kdt_nms, ssc_nms, octree_nms, grid_nms
 from utils_geom import hamming_distance, hamming_distances, l2_distance, l2_distances
@@ -922,9 +924,33 @@ class FeatureManager(object):
 
     # detect keypoints and their descriptors
     # out: kps, des 
-    def detectAndCompute(self, frame, mask=None, filter = True):
-        color_frame = cv2.cvtColor(frame,cv2.COLOR_RGB2BGR)
-        if not self.need_color_image and frame.ndim>2:     # check if we have to convert to gray image 
+    def detectAndCompute(self, frame, mask=None, filter = True, do_recursive = True, color_frame = None):
+        if mask is not None:
+            print("-" * 60)
+            print("-" * 60)
+            print("-" * 60)
+            print("-" * 60)
+            print("-" * 60)
+            print("-" * 60)
+            print("-" * 60)
+            print("-" * 60)
+            print("-" * 60)
+            print("-" * 60)
+            print("-" * 60)
+            print("-" * 60)
+            print("-" * 60)
+            print("-" * 60)
+            print("-" * 60)
+            print("-" * 60)
+            print("-" * 60)
+            print("-" * 60)
+            print("-" * 60)
+            print("-" * 60)
+            print("-" * 60)
+            print("-" * 60)
+        if color_frame is None:
+            color_frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+        if not self.need_color_image and frame.ndim>2 and not do_recursive:     # check if we have to convert to gray image
             frame = cv2.cvtColor(frame,cv2.COLOR_RGB2GRAY)  
         if self.use_pyramid_adaptor:  
             # detectAndCompute with pyramid adaptor (it can optionally include a block adaptor per level)
@@ -932,11 +958,12 @@ class FeatureManager(object):
                 # force detectAndCompute on each level instead of first {detect() on each level} and then {compute() on resulting detected keypoints one time}
                 kps, des = self.pyramid_adaptor.detectAndCompute(frame, mask)  
             #
-            else: 
-                kps = self.detect(frame, mask, filter=True)        # first, detect by using adaptor on the different pyramid levels                             
+            else:
+                print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+                kps = self.detect(frame, mask, filter=True)        # first, detect by using adaptor on the different pyramid levels
                 kps, des = self.compute(frame, kps, filter=False)  # then, separately compute the descriptors on detected keypoints (one time)
                 filter = False # disable keypoint filtering since we already applied it for detection 
-        elif self.use_bock_adaptor:   
+        elif self.use_bock_adaptor:
             # detectAndCompute with block adaptor (force detect/compute on each block)
             #
             #kps, des = self.block_adaptor.detectAndCompute(frame, mask)    
@@ -965,17 +992,34 @@ class FeatureManager(object):
         filter_name = 'NONE'
         if self.keypoint_classifier is not None:
             l = len(kps)
-            kps, des = self.keypoint_classifier.predict_and_filter(kps, des, color_frame)
+            if l > 0:
+                kps, bad, des, _ = self.keypoint_classifier.predict_and_filter(kps, des, color_frame)
             print("Removed ", l - len(kps), "kps")
         if filter:
             kps, des, filter_name  = self.filter_keypoints(self.keypoint_filter_type, frame, kps, des)
         if self.detector_type == FeatureDetectorTypes.SIFT or \
            self.detector_type == FeatureDetectorTypes.ROOT_SIFT or \
            self.detector_type == FeatureDetectorTypes.CONTEXTDESC :
-            unpackSiftOctaveKps(kps, method=UnpackOctaveMethod.INTRAL_LAYERS)           
+            unpackSiftOctaveKps(kps, method=UnpackOctaveMethod.INTRAL_LAYERS)
+
+        if len(kps) < self.num_features*0.6 and do_recursive and self.keypoint_classifier is not None:
+            mask = get_mask(frame, kps, bad)
+            kps2, des2 = self.detectAndCompute(frame, mask, filter, do_recursive=False, color_frame=color_frame)
+            print("--- kps ---", type(kps))
+            if len(kps2) > 0:
+                kps = np.concatenate((kps, kps2))
+                des = np.concatenate((des, des2))
+            print("--- kps ---", type(kps))
+
+        if do_recursive and len(kps) < 1:
+            while True:
+                cv2.imshow("Eirik", cv2.cvtColor(color_frame, cv2.COLOR_BGR2RGB))
+                if cv2.waitKey(20) & 0xff == ord('q'):
+                    break
+
         if kVerbose:
             print('detector:',self.detector_type.name,', descriptor:', self.descriptor_type.name,', #features:', len(kps),' (#ref:', self.num_features, '), [kp-filter:',filter_name,']')                                         
-        self.debug_print(kps)             
+        self.debug_print(kps)
         return kps, des             
  
  

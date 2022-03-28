@@ -125,6 +125,8 @@ def get_patches(padded_img, pts, scales=None, patch_size=60):
 
 def to_binary_vector(descriptors):
     out = []
+    if descriptors is None:
+        return out
     for d in descriptors:
         out.append(((d[:, None] & (1 << np.arange(8))) > 0).flatten().astype(np.single))
     return out

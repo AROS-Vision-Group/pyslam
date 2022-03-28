@@ -77,7 +77,7 @@ if __name__ == "__main__":
     # select your tracker configuration (see the file feature_tracker_configs.py) 
     # LK_SHI_TOMASI, LK_FAST
     # SHI_TOMASI_ORB, FAST_ORB, ORB, BRISK, AKAZE, FAST_FREAK, SIFT, ROOT_SIFT, SURF, SUPERPOINT, FAST_TFEAT
-    tracker_config = FeatureTrackerConfigs.SHI_TOMASI_ORB
+    tracker_config = FeatureTrackerConfigs.TEST
     tracker_config['num_features'] = num_features
 
     tracker_config['keypoint_classifier'] = None

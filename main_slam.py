@@ -68,16 +68,17 @@ if __name__ == "__main__":
                         config.cam_settings['Camera.cx'], config.cam_settings['Camera.cy'],
                         config.DistCoef, config.cam_settings['Camera.fps'])
     
-    num_features=2000 
+    num_features=4000
 
     tracker_type = FeatureTrackerTypes.DES_BF      # descriptor-based, brute force matching with knn 
     #tracker_type = FeatureTrackerTypes.DES_FLANN  # descriptor-based, FLANN-based matching 
 
     # select your tracker configuration (see the file feature_tracker_configs.py) 
     # FeatureTrackerConfigs: SHI_TOMASI_ORB, FAST_ORB, ORB, ORB2, ORB2_FREAK, ORB2_BEBLID, BRISK, AKAZE, FAST_FREAK, SIFT, ROOT_SIFT, SURF, SUPERPOINT, FAST_TFEAT, CONTEXTDESC
-    tracker_config = FeatureTrackerConfigs.SHI_TOMASI_ORB
+    tracker_config = FeatureTrackerConfigs.ORB
     tracker_config['num_features'] = num_features
     tracker_config['tracker_type'] = tracker_type
+    #tracker_config['num_levels'] = 5
 
     tracker_config['keypoint_classifier'] = None
     if len(sys.argv) > 1:
@@ -91,10 +92,10 @@ if __name__ == "__main__":
 
         print(sys.argv[1])
         if sys.argv[1] == "desc":
-            tracker_config['keypoint_classifier'] = DescriptorPredictor(dev, state_dict_path="snow_classification/DescriptorClassifier/Models/model_newdark.pt")
+            tracker_config['keypoint_classifier'] = DescriptorPredictor(dev, state_dict_path="sims_w_simsval_bestf2_9338.pt")
 
         elif sys.argv[1] == "patch":
-            tracker_config['keypoint_classifier'] = PatchPredictor(dev, state_dict_path="snow_classification/PatchClassifier/dark_patch.pt")
+            tracker_config['keypoint_classifier'] = PatchPredictor(dev, state_dict_path="eirik.pt")
     print('tracker_config: ',tracker_config)    
     feature_tracker = feature_tracker_factory(**tracker_config)
     

@@ -17,7 +17,7 @@ class PatchPredictor(Classifier):
         self.batch_size = batch_size
         self.scales = scales
         if scales is None:
-            self.scales = [1]
+            self.scales = [1, 0.75, 0.5]
         self.patch_size = patch_size
         self.classifier = pclf(patch_size=patch_size)
         self.device = device
@@ -30,11 +30,15 @@ class PatchPredictor(Classifier):
     def predict(self, kp, img: np.ndarray) -> (list, list):
         patches = []
         to_tensor = PatchToTensor()
+        normalize = Normalize((60.08485963, 54.651508, 41.74695367), (48.21468226, 50.55234743, 46.27671805), False)
         pad_img = pad_image(img, self.patch_size//2)
         for pt in kp:
-            patch = {'sample': get_patch(pad_img, (int(pt.pt[0]), int(pt.pt[1])), scales=self.scales, patch_size=self.patch_size),
+            patch = {'sample': get_patch(pad_img, (int(pt.pt[0]), int(pt.pt[1])), scales=self.scales,
+                                         patch_size=self.patch_size),
                      'label': np.array([0])}
-            patches.append(to_tensor(patch)['sample'])
+            patch = to_tensor(patch)
+            patch = normalize(patch)
+            patches.append(patch['sample'])
         good = []
         bad = []
         for i in range(0, len(patches), self.batch_size):
@@ -42,7 +46,7 @@ class PatchPredictor(Classifier):
             tensors = tensors.to(self.device)
             pred = self.classifier(tensors).cpu().flatten()
             for j, p in enumerate(pred):
-                if p < 0.5:
+                if p < 0.1:
                     good.append(kp[i+j])
                 else:
                     bad.append(kp[i+j])
@@ -58,6 +62,8 @@ class PatchPredictor(Classifier):
             patches.append(to_tensor(patch)['sample'])
         good = []
         good_des = []
+        bad = []
+        bad_des = []
         for i in range(0, len(patches), self.batch_size):
             tensors = torch.stack(patches[i:i + self.batch_size])
             tensors = tensors.to(self.device)
@@ -66,8 +72,11 @@ class PatchPredictor(Classifier):
                 if p < 0.5:
                     good.append(kp[i+j])
                     good_des.append(des[i + j])
+                else:
+                    bad.append(kp[i+j])
+                    bad_des.append(kp[i+j])
 
-        return np.array(good), np.array(good_des)
+        return np.array(good), np.array(bad), np.array(good_des), np.array(bad_des)
 
 
 class DescriptorPredictor(Classifier):
@@ -102,11 +111,16 @@ class DescriptorPredictor(Classifier):
         pred = self.classifier(bin_des.to(self.device)).cpu().flatten()
         good = []
         good_des = []
+        bad = []
+        bad_des = []
         for i, p in enumerate(pred):
             if p.item() < 0.5:
                 good.append(kp[i])
                 good_des.append(des[i])
-        return good, np.array(good_des)
+            else:
+                bad.append(kp[i])
+                bad_des.append(des[i])
+        return np.array(good), np.array(bad), np.array(good_des), np.array(bad_des)
 
 
 class AllGoodClassifier(Classifier):
